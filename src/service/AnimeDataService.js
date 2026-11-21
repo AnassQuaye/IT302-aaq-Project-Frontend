@@ -1,8 +1,8 @@
 /*
   Name: Anass Agoe-Mensah Quaye
-  Date: October 30, 2026
-  Course: IT-302: Advanced Internet Applications
-  Assignment: Phase 4 Read Node.js Data using React.js Assignment
+  Date: November 20, 2026
+  Course: IT-302-001: Advanced Internet Applications
+  Assignment: Phase 5 C.U.D. Node.js Data using React.js Assignment
   Email: aaq@njit.edu
 */
 
@@ -19,7 +19,6 @@ class AnimeDataService {
     return axios
       .get(`${BACKEND_URL}/api/v1/${ucid}/nexus/id/${id}`)
       .catch(() =>
-        // Fallback: if /id/:id returns 404, locate the single record from getAll
         this.getAll(ucid).then((res) => {
           const list = res.data.nexus || res.data.animes || res.data;
           const found = Array.isArray(list)
@@ -34,6 +33,20 @@ class AnimeDataService {
     return axios.get(
       `${BACKEND_URL}/api/v1/${ucid}/nexus?${by}=${encodeURIComponent(query)}&pageNumber=${page}`
     );
+  }
+
+  createComment(ucid, data) {
+    return axios.post(`${BACKEND_URL}/api/v1/${ucid}/nexus/comment`, data);
+  }
+
+  updateComment(ucid, data) {
+    return axios.put(`${BACKEND_URL}/api/v1/${ucid}/nexus/comment`, data);
+  }
+
+  deleteComment(ucid, commentId, userId) {
+    return axios.delete(`${BACKEND_URL}/api/v1/${ucid}/nexus/comment`, {
+      data: { comment_id: commentId, user_id: userId },
+    });
   }
 }
 

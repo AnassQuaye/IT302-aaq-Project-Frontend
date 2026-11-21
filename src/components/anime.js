@@ -1,14 +1,14 @@
 /*
   Name: Anass Agoe-Mensah Quaye
-  Date: October 30, 2026
-  Course: IT-302: Advanced Internet Applications
-  Assignment: Phase 4 Read Node.js Data using React.js Assignment
+  Date: November 20, 2026
+  Course: IT-302-001: Advanced Internet Applications
+  Assignment: Phase 5 C.U.D. Node.js Data using React.js Assignment
   Email: aaq@njit.edu
 */
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Container, Badge } from 'react-bootstrap';
+import { Card, Container, Badge, Button } from 'react-bootstrap';
 import AnimeDataService from '../service/AnimeDataService';
 
 const Anime = ({ user, ucid }) => {
@@ -17,7 +17,6 @@ const Anime = ({ user, ucid }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // 1. Try single-record endpoint first
     AnimeDataService.get(ucid, id)
       .then((response) => {
         const item = response.data?.anime || response.data?.nexus || response.data;
@@ -28,7 +27,6 @@ const Anime = ({ user, ucid }) => {
         }
       })
       .catch(() => {
-        // 2. Automatic fallback: find the record from getAll()
         AnimeDataService.getAll(ucid)
           .then((res) => {
             const list =
@@ -49,6 +47,20 @@ const Anime = ({ user, ucid }) => {
           });
       });
   }, [ucid, id]);
+
+  const handleDeleteComment = (commentId, index) => {
+    AnimeDataService.deleteComment(ucid, commentId, user.id)
+      .then(() => {
+        setRecord((prev) => {
+          const updatedComments = [...(prev.comments || [])];
+          updatedComments.splice(index, 1);
+          return { ...prev, comments: updatedComments };
+        });
+      })
+      .catch((err) => {
+        console.error('Error deleting comment:', err);
+      });
+  };
 
   if (error) {
     return (
@@ -72,6 +84,8 @@ const Anime = ({ user, ucid }) => {
   const genreText = Array.isArray(record.genre || record.genres)
     ? (record.genre || record.genres).join(', ')
     : record.genre || record.genres || record.type || 'Anime Series';
+
+  const commentsList = Array.isArray(record.comments) ? record.comments : [];
 
   return (
     <Container className="py-2">
@@ -103,25 +117,54 @@ const Anime = ({ user, ucid }) => {
             {String(record.synopsis || record.description || 'No synopsis available.')}
           </p>
 
-          <Link to={`/${ucid}_animes`} className="btn btn-secondary mt-3">
-            Back to Catalog
-          </Link>
+          <div className="mt-3 d-flex gap-2">
+            <Link to={`/${ucid}_animes`} className="btn btn-secondary">
+              Back to Catalog
+            </Link>
+            {user && (
+              <Link to={`/${ucid}_animes/${id}/comment`} className="btn btn-primary">
+                Add Comment
+              </Link>
+            )}
+          </div>
         </Card.Body>
       </Card>
 
       <Card className="shadow-sm">
         <Card.Header as="h5">Community Comments</Card.Header>
         <Card.Body>
-          {Array.isArray(record.comments) && record.comments.length > 0 ? (
-            record.comments.map((comment, index) => (
-              <div key={comment._id || index} className="border-bottom pb-2 mb-2">
+          {commentsList.length > 0 ? (
+            commentsList.map((comment, index) => (
+              <div key={comment._id || index} className="border-bottom pb-3 mb-3">
                 <p className="mb-1">
-                  <strong>{comment.name || comment.user_name || 'Anonymous'}:</strong>{' '}
-                  {comment.text || comment.comment}
+                  <strong>{comment.userName || comment.name || 'Anonymous'}:</strong>{' '}
+                  {comment.text}
                 </p>
-                <small className="text-muted">
-                  Posted: {comment.date ? new Date(comment.date).toLocaleDateString() : 'N/A'}
+                <small className="text-muted d-block mb-2">
+                  Posted:{' '}
+                  {comment.lastModified
+                    ? new Date(comment.lastModified).toLocaleString()
+                    : 'N/A'}
                 </small>
+
+                {user && user.id === comment.userId && (
+                  <div className="d-flex gap-2">
+                    <Link
+                      to={`/${ucid}_animes/${id}/comment`}
+                      state={{ currentComment: comment }}
+                      className="btn btn-sm btn-warning"
+                    >
+                      Edit
+                    </Link>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => handleDeleteComment(comment._id, index)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </div>
             ))
           ) : (

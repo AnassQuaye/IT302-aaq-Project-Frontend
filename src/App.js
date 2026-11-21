@@ -1,8 +1,8 @@
 /*
-  Name: Anass Quaye
-  Date: 10/27/2026
-  Course: IT-302: Advanced Internet Applications 
-  Assignment: Phase 4 Read Node.js Data using React.js Assignment
+  Name: Anass Agoe-Mensah Quaye
+  Date: November 20, 2026
+  Course: IT-302-001: Advanced Internet Applications
+  Assignment: Phase 5 C.U.D. Node.js Data using React.js Assignment
   Email: aaq@njit.edu
 */
 
@@ -11,13 +11,15 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import AnimeList from './components/AnimeList';
 import Anime from './components/anime';
+import Login from './components/login';
+import AddComment from './components/addcomment';
 
 function App() {
   const ucid = 'aaq';
   const [user, setUser] = useState(null);
 
-  const login = (sampleUser = { id: 'aaq_user', name: 'Anass Quaye' }) => {
-    setUser(sampleUser);
+  const login = (userData = null) => {
+    setUser(userData);
   };
 
   const logout = () => {
@@ -37,7 +39,7 @@ function App() {
               <Nav.Link as={Link} to="/">
                 Home
               </Nav.Link>
-              <Nav.Link as={Link} to={`/${ucid}_nexus`}>
+              <Nav.Link as={Link} to={`/${ucid}_animes`}>
                 All Animes
               </Nav.Link>
             </Nav>
@@ -47,7 +49,7 @@ function App() {
                   Logout ({user.name})
                 </Nav.Link>
               ) : (
-                <Nav.Link onClick={() => login()} className="text-light">
+                <Nav.Link as={Link} to={`/${ucid}_login`} className="text-light">
                   Login
                 </Nav.Link>
               )}
@@ -61,6 +63,8 @@ function App() {
           <Route path="/" element={<AnimeList ucid={ucid} />} />
           <Route path={`/${ucid}_animes`} element={<AnimeList ucid={ucid} />} />
           <Route path={`/${ucid}_animes/:id`} element={<Anime user={user} ucid={ucid} />} />
+          <Route path={`/${ucid}_animes/:id/comment`} element={<AddComment user={user} ucid={ucid} />} />
+          <Route path={`/${ucid}_login`} element={<Login login={login} ucid={ucid} />} />
         </Routes>
       </Container>
     </div>
